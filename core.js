@@ -358,7 +358,7 @@ function createServer(config, log) {
     server.bind(config.port || 8125, config.address || undefined);
     mgmtServer.listen(config.mgmt_port || 8126, config.mgmt_address || undefined);
 
-    util.log("server is up");
+    l.log("server is up");
 
     pctThreshold = config.percentThreshold || 90;
     if (!Array.isArray(pctThreshold)) {
