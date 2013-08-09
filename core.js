@@ -36,13 +36,11 @@ function setHealthStatus(health) {
 function loadBackend(config, name) {
   var backendmod = require(name);
 
-  if (config.debug) {
-    l.log("Loading backend: " + name, 'DEBUG');
-  }
+  l.debug("Loading backend: " + name);
 
   var ret = backendmod.init(startup_time, config, backendEvents);
   if (!ret) {
-    l.log("Failed to load backend: " + name);
+    l.warn("Failed to load backend: " + name);
     process.exit(1);
   }
 }
@@ -177,7 +175,7 @@ function createServer(config, log) {
           continue;
         }
         if (config.dumpMessages) {
-          l.log(metrics[midx].toString());
+          l.debug(metrics[midx].toString());
         }
         var bits = metrics[midx].toString().split(':');
         var key = bits.shift()
@@ -203,14 +201,14 @@ function createServer(config, log) {
             if (fields[2].match(/^@([\d\.]+)/)) {
               sampleRate = Number(fields[2].match(/^@([\d\.]+)/)[1]);
             } else {
-              l.log('Bad line: ' + fields + ' in msg "' + metrics[midx] +'"; has invalid sample rate');
+              l.warn('Bad line: ' + fields + ' in msg "' + metrics[midx] +'"; has invalid sample rate');
               counters[bad_lines_seen]++;
               stats.messages.bad_lines_seen++;
               continue;
             }
           }
           if (fields[1] === undefined) {
-              l.log('Bad line: ' + fields + ' in msg "' + metrics[midx] +'"');
+              l.warn('Bad line: ' + fields + ' in msg "' + metrics[midx] +'"');
               counters[bad_lines_seen]++;
               stats.messages.bad_lines_seen++;
               continue;
@@ -250,7 +248,7 @@ function createServer(config, log) {
       stream.setEncoding('ascii');
 
       stream.on('error', function(err) {
-        l.log('Caught ' + err +', Moving on');
+        l.error('Caught ' + err +', Moving on');
       });
 
       stream.on('data', function(data) {
@@ -307,7 +305,7 @@ function createServer(config, log) {
             // Let each backend contribute its status
             backendEvents.emit('status', function(err, name, stat, val) {
               if (err) {
-                l.log("Failed to read stats for backend " +
+                l.warn("Failed to read stats for backend " +
                          name + ": " + err);
               } else {
                 stat_writer(name, stat, val);
@@ -358,7 +356,7 @@ function createServer(config, log) {
     server.bind(config.port || 8125, config.address || undefined);
     mgmtServer.listen(config.mgmt_port || 8126, config.mgmt_address || undefined);
 
-    l.log("server is up");
+    l.info("server is up");
 
     pctThreshold = config.percentThreshold || 90;
     if (!Array.isArray(pctThreshold)) {
